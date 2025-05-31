@@ -23,36 +23,93 @@ function restart() {
 }
 
 function drawPlane() {
+  // 본체
+  ctx.save();
+  ctx.translate(plane.x + plane.w/2, plane.y + plane.h/2);
+  ctx.beginPath();
+  ctx.moveTo(0, -plane.h/2);
+  ctx.lineTo(-plane.w/2, plane.h/2);
+  ctx.lineTo(plane.w/2, plane.h/2);
+  ctx.closePath();
   ctx.fillStyle = '#4fc3f7';
-  ctx.fillRect(plane.x, plane.y, plane.w, plane.h);
+  ctx.shadowColor = '#2196f3';
+  ctx.shadowBlur = 10;
+  ctx.fill();
+  ctx.restore();
+  // 조종석
+  ctx.save();
+  ctx.translate(plane.x + plane.w/2, plane.y + plane.h/6);
+  ctx.beginPath();
+  ctx.arc(0, 0, 7, 0, Math.PI * 2);
   ctx.fillStyle = '#fff';
-  ctx.fillRect(plane.x+plane.w/2-5, plane.y+10, 10, 20);
+  ctx.shadowBlur = 0;
+  ctx.fill();
+  ctx.restore();
 }
 
 function drawBullets() {
   ctx.fillStyle = '#ffeb3b';
-  bullets.forEach(b => ctx.fillRect(b.x, b.y, b.w, b.h));
+  bullets.forEach(b => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(b.x + b.w/2, b.y, 4, 0, Math.PI * 2);
+    ctx.shadowColor = '#fffde7';
+    ctx.shadowBlur = 6;
+    ctx.fill();
+    ctx.restore();
+  });
 }
 
 function drawEnemies() {
-  ctx.fillStyle = '#e57373';
-  enemies.forEach(e => ctx.fillRect(e.x, e.y, e.w, e.h));
+  enemies.forEach(e => {
+    ctx.save();
+    ctx.translate(e.x + e.w/2, e.y + e.h/2);
+    ctx.beginPath();
+    ctx.arc(0, 0, e.w/2, 0, Math.PI * 2);
+    ctx.fillStyle = '#e57373';
+    ctx.shadowColor = '#ff1744';
+    ctx.shadowBlur = 10;
+    ctx.fill();
+    ctx.restore();
+  });
+}
+
+function drawBackground() {
+  let grad = ctx.createLinearGradient(0, 0, 0, HEIGHT);
+  grad.addColorStop(0, '#232b60');
+  grad.addColorStop(1, '#6dd5ed');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
 }
 
 function draw() {
-  ctx.clearRect(0,0,WIDTH,HEIGHT);
+  drawBackground();
   drawPlane();
   drawBullets();
   drawEnemies();
+  ctx.save();
   ctx.fillStyle = '#fff';
-  ctx.font = '20px Arial';
-  ctx.fillText('Score: ' + score, 10, 30);
+  ctx.font = 'bold 22px Arial';
+  ctx.shadowColor = '#000';
+  ctx.shadowBlur = 2;
+  ctx.fillText('Score: ' + score, 12, 34);
+  ctx.restore();
   if (gameOver) {
+    ctx.save();
+    ctx.globalAlpha = 0.85;
+    ctx.fillStyle = '#232b60';
+    ctx.fillRect(40, 220, 320, 120);
+    ctx.globalAlpha = 1;
     ctx.fillStyle = '#f44336';
-    ctx.font = '36px Arial';
-    ctx.fillText('Game Over', 100, 300);
+    ctx.font = 'bold 40px Arial';
+    ctx.shadowColor = '#fff';
+    ctx.shadowBlur = 5;
+    ctx.fillText('Game Over', 90, 270);
     ctx.font = '20px Arial';
-    ctx.fillText('Press R to Restart', 110, 340);
+    ctx.fillStyle = '#fff';
+    ctx.shadowBlur = 0;
+    ctx.fillText('Press R to Restart', 110, 310);
+    ctx.restore();
   }
 }
 
