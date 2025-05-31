@@ -51,34 +51,68 @@ function restart() {
   enemies = [];
   score = 0;
   gameOver = false;
-  bombs = 3;
-  energy = 1;
-  energyMode = false;
-  energyTimer = 0;
 }
 
 function drawPlane() {
-  // 본체
+  // 1945 스타일 전투기
   ctx.save();
   ctx.translate(plane.x + plane.w/2, plane.y + plane.h/2);
+  // 동체(메탈릭)
   ctx.beginPath();
-  ctx.moveTo(0, -plane.h/2);
-  ctx.lineTo(-plane.w/2, plane.h/2);
-  ctx.lineTo(plane.w/2, plane.h/2);
+  ctx.ellipse(0, 0, 10, 20, 0, 0, Math.PI * 2);
+  ctx.fillStyle = energyMode ? '#ffe082' : '#90a4ae';
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 2;
+  ctx.fill();
+  ctx.stroke();
+  // 노즈(기수)
+  ctx.beginPath();
+  ctx.arc(0, -18, 5, 0, Math.PI * 2);
+  ctx.fillStyle = '#fbc02d';
+  ctx.fill();
+  ctx.stroke();
+  // 캐노피(조종석)
+  ctx.beginPath();
+  ctx.ellipse(0, -5, 6, 7, 0, 0, Math.PI * 2);
+  ctx.fillStyle = '#b3e5fc';
+  ctx.fill();
+  ctx.stroke();
+  // 좌우 날개
+  ctx.beginPath();
+  ctx.moveTo(-18, 0);
+  ctx.lineTo(-35, 10);
+  ctx.lineTo(-18, 12);
   ctx.closePath();
-  ctx.fillStyle = energyMode ? '#ffd600' : '#4fc3f7';
-  ctx.shadowColor = energyMode ? '#ffd600' : '#2196f3';
-  ctx.shadowBlur = 10;
+  ctx.fillStyle = '#1976d2';
   ctx.fill();
-  ctx.restore();
-  // 조종석
-  ctx.save();
-  ctx.translate(plane.x + plane.w/2, plane.y + plane.h/6);
+  ctx.stroke();
   ctx.beginPath();
-  ctx.arc(0, 0, 7, 0, Math.PI * 2);
-  ctx.fillStyle = '#fff';
-  ctx.shadowBlur = 0;
+  ctx.moveTo(18, 0);
+  ctx.lineTo(35, 10);
+  ctx.lineTo(18, 12);
+  ctx.closePath();
+  ctx.fillStyle = '#1976d2';
   ctx.fill();
+  ctx.stroke();
+  // 꼬리날개
+  ctx.beginPath();
+  ctx.moveTo(0, 15);
+  ctx.lineTo(-5, 28);
+  ctx.lineTo(5, 28);
+  ctx.closePath();
+  ctx.fillStyle = '#90caf9';
+  ctx.fill();
+  ctx.stroke();
+  // 프로펠러
+  ctx.save();
+  ctx.rotate(Math.PI/8);
+  ctx.beginPath();
+  ctx.moveTo(0, -22);
+  ctx.lineTo(0, -32);
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#bdbdbd';
+  ctx.stroke();
+  ctx.restore();
   ctx.restore();
 }
 
