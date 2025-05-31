@@ -6,6 +6,7 @@ let bullets = [];
 let enemies = [];
 let score = 0;
 let gameOver = false;
+let gameStarted = false;
 let bombs = 3;
 let energy = 1;
 let energyMode = false;
@@ -23,24 +24,30 @@ function fireBullets() {
 }
 
 document.addEventListener('keydown', e => {
+  if (!gameStarted && (e.key === ' ' || e.key === 'Spacebar')) {
+    gameStarted = true;
+    return;
+  }
+  if (!gameStarted) return;
   if (e.key === 'ArrowLeft') plane.x = Math.max(0, plane.x - 20);
   if (e.key === 'ArrowRight') plane.x = Math.min(WIDTH - plane.w, plane.x + 20);
   if (e.key === ' ' || e.key === 'Spacebar') fireBullets();
   if (e.key === 'b' || e.key === 'B') {
     if (bombs > 0 && !gameOver) {
       bombs--;
-      // 폭탄 효과: 모든 적 제거
       enemies = [];
-      // 폭발 이펙트 화면 전체에
       bombEffectTimer = 20;
     }
   }
   if ((e.key === 'e' || e.key === 'E') && energy > 0 && !energyMode && !gameOver) {
     energy--;
     energyMode = true;
-    energyTimer = 300; // 약 5초 (60fps 기준)
+    energyTimer = 300;
   }
-  if (gameOver && e.key === 'r') restart();
+  if (gameOver && e.key === 'r') {
+    restart();
+    gameStarted = false;
+  }
 });
 
 let bombEffectTimer = 0;
@@ -152,18 +159,15 @@ function drawBackground() {
 }
 
 function drawDirectionArrows() {
-  // 좌우 방향 표시
   ctx.save();
   ctx.globalAlpha = 0.5;
   ctx.fillStyle = '#fff';
-  // 왼쪽
   ctx.beginPath();
   ctx.moveTo(30, HEIGHT-50);
   ctx.lineTo(10, HEIGHT-40);
   ctx.lineTo(30, HEIGHT-30);
   ctx.closePath();
   ctx.fill();
-  // 오른쪽
   ctx.beginPath();
   ctx.moveTo(WIDTH-30, HEIGHT-50);
   ctx.lineTo(WIDTH-10, HEIGHT-40);
@@ -202,7 +206,50 @@ function drawBombEffect() {
   }
 }
 
+function drawIntro() {
+  drawBackground();
+  ctx.save();
+  ctx.globalAlpha = 0.88;
+  ctx.fillStyle = '#232b60';
+  ctx.fillRect(40, 180, 320, 200);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 38px Arial';
+  ctx.shadowColor = '#1976d2';
+  ctx.shadowBlur = 8;
+  ctx.fillText('PLANE SHOOTER', 55, 250);
+  ctx.font = '22px Arial';
+  ctx.shadowBlur = 0;
+  ctx.fillText('스페이스바를 눌러 시작', 80, 295);
+  ctx.font = '16px Arial';
+  ctx.fillText('B: 폭탄  E: 에너지모드', 110, 325);
+  ctx.fillText('방향키: 이동', 140, 350);
+  ctx.restore();
+}
+
+function drawGameOver() {
+  ctx.save();
+  ctx.globalAlpha = 0.85;
+  ctx.fillStyle = '#232b60';
+  ctx.fillRect(40, 220, 320, 120);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#f44336';
+  ctx.font = 'bold 40px Arial';
+  ctx.shadowColor = '#fff';
+  ctx.shadowBlur = 5;
+  ctx.fillText('Game Over', 90, 270);
+  ctx.font = '20px Arial';
+  ctx.fillStyle = '#fff';
+  ctx.shadowBlur = 0;
+  ctx.fillText('Press R to Restart', 110, 310);
+  ctx.restore();
+}
+
 function draw() {
+  if (!gameStarted) {
+    drawIntro();
+    return;
+  }
   drawBackground();
   drawPlane();
   drawBullets();
@@ -211,41 +258,22 @@ function draw() {
   drawStatusBar();
   drawBombEffect();
   if (gameOver) {
-    ctx.save();
-    ctx.globalAlpha = 0.85;
-    ctx.fillStyle = '#232b60';
-    ctx.fillRect(40, 220, 320, 120);
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = '#f44336';
-    ctx.font = 'bold 40px Arial';
-    ctx.shadowColor = '#fff';
-    ctx.shadowBlur = 5;
-    ctx.fillText('Game Over', 90, 270);
-    ctx.font = '20px Arial';
-    ctx.fillStyle = '#fff';
-    ctx.shadowBlur = 0;
-    ctx.fillText('Press R to Restart', 110, 310);
-    ctx.restore();
+    drawGameOver();
   }
 }
 
 function update() {
-  if (gameOver) return;
-  // 총알 이동
+  if (gameOver || !gameStarted) return;
   bullets.forEach(b => {
     b.y -= 10;
     if (b.dx) b.x += b.dx;
   });
-  // 에너지 모드 타이머
   if (energyMode) {
     energyTimer--;
     if (energyTimer <= 0) energyMode = false;
   }
-  // 폭탄 이펙트 타이머
   if (bombEffectTimer > 0) bombEffectTimer--;
-  // 적 이동
   enemies.forEach(e => e.y += 3);
-  // 총알-적 충돌
   for (let i = enemies.length-1; i >= 0; i--) {
     for (let j = bullets.length-1; j >= 0; j--) {
       let e = enemies[i], b = bullets[j];
@@ -257,16 +285,13 @@ function update() {
       }
     }
   }
-  // 적-비행기 충돌
   for (let e of enemies) {
     if (plane.x < e.x+e.w && plane.x+plane.w > e.x && plane.y < e.y+e.h && plane.y+plane.h > e.y) {
       gameOver = true;
     }
   }
-  // 화면 밖 제거
   bullets = bullets.filter(b => b.y + b.h > 0 && b.x > -10 && b.x < WIDTH+10);
   enemies = enemies.filter(e => e.y < HEIGHT);
-  // 적 생성
   if (Math.random() < 0.03) {
     let ex = Math.random() * (WIDTH-40);
     enemies.push({ x: ex, y: -40, w: 40, h: 40 });
