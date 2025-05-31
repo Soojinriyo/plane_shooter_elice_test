@@ -8,8 +8,8 @@ let score = 0;
 let gameOver = false;
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowLeft') plane.x -= 20;
-  if (e.key === 'ArrowRight') plane.x += 20;
+  if (e.key === 'ArrowLeft') plane.x = Math.max(0, plane.x - 20);
+  if (e.key === 'ArrowRight') plane.x = Math.min(WIDTH - plane.w, plane.x + 20);
   if (e.key === ' ' || e.key === 'Spacebar') bullets.push({ x: plane.x+plane.w/2-3, y: plane.y, w: 6, h: 15 });
   if (gameOver && e.key === 'r') restart();
 });
